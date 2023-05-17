@@ -1,50 +1,23 @@
-//  ------------ Setup ------------
 window.focus;
 const SCREENWIDTH = innerWidth;
 const SCREENHEIGHT = innerHeight;
-let gameCanvas = document.getElementById("gameCanvas");
-let c = gameCanvas.getContext("2d"); // Drawing object
-gameCanvas.height = 500;
-gameCanvas.width = 700;
+const gameCanvas = document.getElementById("gameCanvas");
+const c = gameCanvas.getContext("2d");
+gameCanvas.height = 650;
+gameCanvas.width = 850;
 let spaceship = document.getElementById("spaceship");
-// -------------------------------------
-// Player variables
-let playerX = 100;
-let playerY = 100;
-let playerWidth = 10;
-let playerHeight = 10;
-let dx = 7;
-let dy = 7;
+let score = 0;
+let wave = 0;
+let playerX = 425;
+let playerY = 325;
+let dx = 9;
+let dy = 9;
 let directions = {
   left: false,
   right: false,
   up: false,
   down: false,
 };
-
-let powerUp = {
-  x: 50,
-  y: 100,
-  width: 30,
-  height: 30,
-  image: new Image(),
-  collected: false,
-};
-
-powerUp.image.src = "powerup.png";
-
-function checkCollisions(player, powerUp) {
-  if (
-    player.x < powerUp.x + powerUp.width &&
-    player.x + player.width > powerUp.x &&
-    player.y < powerUp.y + powerUp.height &&
-    player.y + player.height > powerUp.y
-  ) {
-    return true;
-  }
-  return false;
-}
-
 class Bullet {
   constructor(x, y, dx, dy) {
     this.x = x;
@@ -64,7 +37,7 @@ class Enemy {
 let bullets = [];
 
 let enemies = [];
-// -------------------------------------
+
 // ------------ Player movement ------------
 document.addEventListener("keydown", (e) => {
   switch (e.key) {
@@ -107,84 +80,162 @@ document.addEventListener("keyup", (e) => {
 document.addEventListener("keydown", (e) => {
   switch (e.key) {
     case "e":
-      let enemy = new Enemy(Math.floor(Math.random() * 695), 10);
-      enemies.push(enemy);
+      for (let i = 0; i <= 5; i++) {
+        let wall = Math.random();
+        if (wall < 1 / 4) {
+          let enemy = new Enemy(Math.floor(Math.random() * 845), -50);
+          enemies.push(enemy);
+        } else if (wall < 2 / 4) {
+          let enemy = new Enemy(900, Math.floor(Math.random() * 645));
+          enemies.push(enemy);
+        } else if (wall < 3 / 4) {
+          let enemy = new Enemy(Math.floor(Math.random() * 845), 700);
+          enemies.push(enemy);
+        } else if (wall < 1) {
+          let enemy = new Enemy(-50, Math.floor(Math.random() * 645));
+          enemies.push(enemy);
+        }
+      }
   }
 });
+
+function enemySpawner() {
+  let spawnRate = 5750;
+  wave = 0;
+
+  function spawnEnemies() {
+    for (let i = 0; i <= 4; i++) {
+      let wall = Math.random();
+      if (wall < 1 / 4) {
+        let enemy = new Enemy(Math.floor(Math.random() * 845), -50);
+        enemies.push(enemy);
+      } else if (wall < 2 / 4) {
+        let enemy = new Enemy(900, Math.floor(Math.random() * 645));
+        enemies.push(enemy);
+      } else if (wall < 3 / 4) {
+        let enemy = new Enemy(Math.floor(Math.random() * 845), 700);
+        enemies.push(enemy);
+      } else if (wall < 1) {
+        let enemy = new Enemy(-50, Math.floor(Math.random() * 645));
+        enemies.push(enemy);
+      }
+    }
+
+    spawnRate -= 325;
+    wave += 1;
+
+    if (spawnRate > 0) {
+      setTimeout(spawnEnemies, spawnRate);
+    }
+  }
+
+  spawnEnemies();
+}
+enemySpawner();
 
 let ammo = 0;
 setInterval(() => {
   if (ammo < 1) {
     ammo += 1;
   }
-}, 500);
+}, 300);
 
-document.addEventListener("keydown", (e) => {
+document.addEventListener("keyup", (e) => {
   switch (e.key) {
     case "ArrowLeft":
       if (ammo == 1) {
-        bullet = new Bullet(playerX - 20, playerY, -10, 0);
+        bullet = new Bullet(playerX - 20, playerY, -30, 0);
         bullets.push(bullet);
+        spaceship.style.transform = "rotate(270deg)";
         ammo -= 1;
-        break;
       }
+      break;
     case "ArrowRight":
       if (ammo == 1) {
-        bullet = new Bullet(playerX + 20, playerY, 10, 0);
+        bullet = new Bullet(playerX + 20, playerY, 30, 0);
         bullets.push(bullet);
+        spaceship.style.transform = "rotate(90deg)";
         ammo -= 1;
-        break;
       }
+      break;
     case "ArrowUp":
       if (ammo == 1) {
-        bullet = new Bullet(playerX, playerY - 20, 0, -10);
+        bullet = new Bullet(playerX, playerY - 40, 0, -30);
         bullets.push(bullet);
+        spaceship.style.transform = "rotate(0deg)";
         ammo -= 1;
-        break;
       }
+      break;
     case "ArrowDown":
       if (ammo == 1) {
-        bullet = new Bullet(playerX, playerY + 20, 0, 10);
+        bullet = new Bullet(playerX, playerY + 40, 0, 30);
         bullets.push(bullet);
+        spaceship.style.transform = "rotate(180deg)";
         ammo -= 1;
-        break;
       }
+      break;
     default:
       break;
   }
 });
 
-function detectCollision(bullet, bulletIndex) {
+function detectCollision(bullet, bulletIndex, score) {
   for (var enemyIndex = enemies.length - 1; enemyIndex >= 0; enemyIndex--) {
     let enemy = enemies[enemyIndex];
     if (
-      bullet.x >= enemy.x &&
-      bullet.x <= enemy.x + 35 &&
-      bullet.y >= enemy.y &&
-      bullet.y <= enemy.y + 35
+      bullet.x >= enemy.x - 15 &&
+      bullet.x <= enemy.x + 65 &&
+      bullet.y >= enemy.y - 20 &&
+      bullet.y <= enemy.y + 70
     ) {
       console.log("hit");
       enemies.splice(enemyIndex, 1);
       bullets.splice(bulletIndex, 1);
+      score += 1;
     }
   }
+  return score;
 }
 
+function enemyMovement(enemy) {
+  if (enemy.x > playerX - 40) {
+    enemy.x += -3;
+  }
+  if (enemy.x < playerX) {
+    enemy.x += 3;
+  }
+  if (enemy.y > playerY - 40) {
+    enemy.y += -3;
+  }
+  if (enemy.y < playerY) {
+    enemy.y += 3;
+  }
+  if (
+    enemy.y >= playerY - 75 &&
+    enemy.y <= playerY + 50 &&
+    enemy.x >= playerX - 60 &&
+    enemy.x <= playerX + 40
+  ) {
+    location.reload();
+  }
+}
 // -------------------------------------
 // ------------ Animation ------------
 function animate() {
-  requestAnimationFrame(animate); // Run gameloop recursively
-  c.clearRect(0, 0, gameCanvas.width, gameCanvas.height); // Clear screen
-  // console.log(bullets);
+  requestAnimationFrame(animate);
+  c.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
   for (var i = bullets.length - 1; i >= 0; i--) {
     let bullet = bullets[i];
-    c.fillStyle = "orange";
-    c.fillRect(bullet.x, bullet.y, 10, 10);
+    c.fillStyle = "yellow";
+    if (bullet.dy == 0) {
+      c.fillRect(bullet.x, bullet.y, 30, 8);
+    } else if (bullet.dx == 0) {
+      c.fillRect(bullet.x, bullet.y, 8, 30);
+    }
     bullet.x += bullet.dx;
     bullet.y += bullet.dy;
-    detectCollision(bullet, i);
-    ("");
+    score = detectCollision(bullet, i, score);
     if (
       bullet.x < 0 ||
       bullet.x > gameCanvas.width ||
@@ -195,13 +246,20 @@ function animate() {
     }
   }
 
+  document.getElementById("score").innerHTML = `Score:${score}`;
+  document.getElementById("wave").innerHTML = `Wave:${wave}`;
+
+  const enemyImage = new Image();
+  enemyImage.src = "Alien.png";
   enemies.forEach((enemy) => {
-    c.fillStyle = "purple";
-    c.fillRect(enemy.x, enemy.y, 35, 35);
+    c.fillRect(enemy.x, enemy.y, 40, 40);
+    c.drawImage(enemyImage, enemy.x - 30, enemy.y - 30, 100, 100);
+    enemyMovement(enemy);
   });
 
-  c.fillStyle = "white";
-  c.fillRect(playerX, playerY, playerWidth, playerHeight); // Draw player
+  var playerImage = document.getElementById("spaceship");
+  playerImage.style.top = `${playerY - 10}px`;
+  playerImage.style.left = `${playerX - 10}px`;
 
   if (directions.right && directions.up) {
     playerX += dx / 2;
@@ -223,7 +281,6 @@ function animate() {
     playerX -= dx / 2;
     playerY -= dy / 2;
   }
-
   if (directions.up) {
     playerY -= dy;
   }
@@ -233,11 +290,11 @@ function animate() {
 
   if (playerY <= -5) {
     playerY += dy;
-  } else if (playerY >= 495) {
+  } else if (playerY >= 645) {
     playerY -= dy;
   } else if (playerX <= -5) {
     playerX += dx;
-  } else if (playerX >= 695) {
+  } else if (playerX >= 845) {
     playerX -= dx;
   }
 }

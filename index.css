@@ -17,9 +17,33 @@ h1 {
   font-family: "DotGothic16", sans-serif;
 }
 
+h2 {
+  position: absolute;
+  font-size: 50px;
+  top: 2.5vh;
+  left: 73vw;
+  color: white;
+  font-family: "DotGothic16", sans-serif;
+}
+
+h3 {
+  position: absolute;
+  font-size: 50px;
+  top: 6vh;
+  left: 73vw;
+  color: white;
+  font-family: "DotGothic16", sans-serif;
+}
+
 .display {
   display: flex;
   justify-content: center;
+}
+
+#canvasContainer {
+  position: relative;
+  height: 650px;
+  width: 850px;
 }
 
 #gameCanvas {
@@ -30,11 +54,10 @@ h1 {
 }
 
 img {
-  height: 40px;
-  width: 40px;
   position: absolute;
 }
 
-/* audio {
-  display: none;
-} */
+#spaceship {
+  height: 40px;
+  width: 40px;
+}

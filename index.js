@@ -77,6 +77,8 @@ document.addEventListener("keyup", (e) => {
   }
 });
 
+// E spawn fiende
+
 document.addEventListener("keydown", (e) => {
   switch (e.key) {
     case "e":
@@ -99,9 +101,13 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// funktion för waves
+
 function enemySpawner() {
   let spawnRate = 5750;
   wave = 0;
+
+  // Spawnar enemies på olika platser i framen beroende på Math.random
 
   function spawnEnemies() {
     for (let i = 0; i <= 4; i++) {
@@ -133,12 +139,16 @@ function enemySpawner() {
 }
 enemySpawner();
 
+// Ammo
+
 let ammo = 0;
 setInterval(() => {
   if (ammo < 1) {
     ammo += 1;
   }
 }, 300);
+
+// Skjut samt rotering
 
 document.addEventListener("keyup", (e) => {
   switch (e.key) {
@@ -178,6 +188,8 @@ document.addEventListener("keyup", (e) => {
       break;
   }
 });
+
+// kollision med kulor och fiender samt score function
 
 function detectCollision(bullet, bulletIndex, score) {
   for (var enemyIndex = enemies.length - 1; enemyIndex >= 0; enemyIndex--) {
@@ -260,6 +272,8 @@ function animate() {
   var playerImage = document.getElementById("spaceship");
   playerImage.style.top = `${playerY - 10}px`;
   playerImage.style.left = `${playerX - 10}px`;
+
+  // Rörelse diagonalt likadant som fram, sida och bak
 
   if (directions.right && directions.up) {
     playerX += dx / 2;
